@@ -8,30 +8,20 @@ services:
     dockerContext: .
     envVars:
       - key: DATABASE_URL
-        value: postgresql://user:password@image-db:5432/image_db
+        sync: false   # Will be linked from Render Postgres
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /app/service_account.json
     disk:
       name: service-account
       mountPath: /app/service_account.json
       sizeGB: 1
-    buildCommand: ""
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
-  - type: web
+  - type: static
     name: image-frontend
-    env: docker
     plan: free
     region: singapore
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: .
-    buildCommand: ""
-    startCommand: "nginx -g 'daemon off;'"
+    staticPublishPath: ./frontend
     envVars:
-      - key: REACT_APP_API_URL
+      - key: API_BASE_URL
         value: https://image-backend.onrender.com
-
-  - type: postgres
-    name: image-db
-    plan: free
-    region: singapore
