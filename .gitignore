@@ -1,5 +1,6 @@
 # 🔒 Ignore secrets and credentials
 service_account.json
+backend/service_account.json
 credentials.json
 token.pkl
 backend/token.pkl
