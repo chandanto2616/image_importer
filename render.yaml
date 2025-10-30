@@ -8,7 +8,7 @@ services:
     dockerContext: .
     envVars:
       - key: DATABASE_URL
-        sync: false   # Will be linked from Render Postgres
+        sync: false     # will be set manually in Render UI after DB creation
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /app/service_account.json
     disk:
