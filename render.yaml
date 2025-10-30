@@ -8,7 +8,7 @@ services:
     dockerContext: .
     envVars:
       - key: DATABASE_URL
-        sync: false     # will be set manually in Render UI after DB creation
+        sync: false     # will be added in Render UI
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /app/service_account.json
     disk:
@@ -17,8 +17,9 @@ services:
       sizeGB: 1
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
-  - type: static
+  - type: web
     name: image-frontend
+    env: static
     plan: free
     region: singapore
     staticPublishPath: ./frontend
