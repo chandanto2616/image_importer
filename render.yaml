@@ -1,29 +1,30 @@
+databases:
+  - name: image-db
+    plan: free
+    databaseName: image_db
+    user: image_user
+
 services:
   - type: web
     name: image-backend
     env: docker
     plan: free
-    region: singapore
     dockerfilePath: ./backend/Dockerfile
     dockerContext: .
     envVars:
       - key: DATABASE_URL
-        sync: false     # You'll add this from Render UI later
+        fromDatabase:
+          name: image-db
+          property: connectionString
       - key: GOOGLE_APPLICATION_CREDENTIALS
         value: /app/service_account.json
-    disk:
-      name: service-account
-      mountPath: /app/service_account.json
-      sizeGB: 1
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 8000"
 
   - type: web
     name: image-frontend
-    env: static
+    env: docker
     plan: free
-    region: singapore
-    buildCommand: ""
-    startCommand: "python3 -m http.server 10000 --directory ./frontend"
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: .
     envVars:
       - key: API_BASE_URL
         value: https://image-backend.onrender.com
