@@ -1,0 +1,48 @@
+version: "3.9"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    volumes:
+      - ./backend:/app
+      - ./service_account.json:/app/service_account.json  # 👈 add this
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json
+      - DATABASE_URL=postgresql://user:password@db:5432/image_db
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+  db:
+    image: postgres:15
+    container_name: db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: image_db
+    volumes:
+      - image_importer_postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+
+volumes:
+  image_importer_postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

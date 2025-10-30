@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Google Drive → Cloud Sync</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; background: #f4f4f4; }
+    #gallery img { width: 200px; height: 200px; object-fit: cover; border-radius: 10px; margin: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+    #gallery { display: flex; flex-wrap: wrap; }
+    button { margin-left: 10px; padding: 8px 12px; border: none; border-radius: 6px; background: #007bff; color: white; cursor: pointer; }
+    button:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+  <h2>Google Drive → Cloud Sync</h2>
+  <input type="text" id="folderId" placeholder="Enter Google Drive Folder ID" />
+  <button id="syncBtn">Start Sync</button>
+  <button id="stopBtn" style="background: red;">Stop Sync</button>
+
+  <h3>Synced Images:</h3>
+  <div id="gallery"></div>
+
+  <script>
+    let syncActive = false;
+    const gallery = document.getElementById("gallery");
+
+    async function fetchImages() {
+      if (!syncActive) return;
+      const res = await fetch("http://localhost:8000/images");
+      const images = await res.json();
+      gallery.innerHTML = "";
+      images.forEach(img => {
+        const el = document.createElement("img");
+        el.src = img.cloudinary_url;  // use Cloudinary URL from backend
+        gallery.appendChild(el);
+      });
+    }
+
+    document.getElementById("syncBtn").addEventListener("click", async () => {
+      const folderId = document.getElementById("folderId").value.trim();
+      if (!folderId) return alert("Enter Google Drive folder ID!");
+
+      // 1️⃣ Clear old images first
+      await fetch("http://localhost:8000/clear-images", { method: "POST" });
+      gallery.innerHTML = "";
+
+      // 2️⃣ Start syncing new folder
+      await fetch("http://localhost:8000/start-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ folder_id: folderId })
+      });
+
+      syncActive = true;
+      alert("Sync started. Fetching images...");
+      fetchImages();
+      setInterval(fetchImages, 5000);
+    });
+
+    // 3️⃣ Stop syncing
+    document.getElementById("stopBtn").addEventListener("click", async () => {
+      await fetch("http://localhost:8000/stop-sync", { method: "POST" });
+      syncActive = false;
+      alert("Sync stopped!");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# 🔒 Ignore secrets and credentials
+service_account.json
+credentials.json
+token.pkl
+backend/token.pkl
+
+# Optional: ignore environment files
+.env
